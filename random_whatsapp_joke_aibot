@@ -1,0 +1,37 @@
+import os
+import openai
+import pywhatkit as kit
+import time
+
+# Load your OpenAI API key from environment variables
+openai.api_key = os.getenv("openai_key") or os.getenv("OPENAI_KEY")
+
+def get_joke():
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a funny joke generator."},
+                {"role": "user", "content": "Tell me a clean, original, short joke."}
+            ],
+            max_tokens=50,
+            temperature=0.9,
+        )
+        joke = response.choices[0].message.content.strip()
+        return joke
+    except Exception as e:
+        print(f"Error generating joke: {type(e).__name__}: {e}")
+        return "Sorry, I couldn't think of a joke today!"
+
+def send_whatsapp_message(phone_number, message):
+    try:
+        print(f"Sending to {phone_number}: {message}")
+        kit.sendwhatmsg_instantly(phone_number, message)
+        print("Message sent!")
+    except Exception as e:
+        print(f"Error sending WhatsApp message: {e}")
+
+if __name__ == "__main__":
+    target_number = "+9112345678"  # Replace with your recipient's number including country code
+    joke_text = get_joke()
+    send_whatsapp_message(target_number, joke_text)
